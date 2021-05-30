@@ -62,6 +62,72 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+# class UserSerializer(serializers.ModelSerializer):
+#     email = serializers.EmailField(
+#         required=True,
+#         validators=[UniqueValidator(
+#             queryset=User.objects.all(), message="A user with that email already exists."
+#         )]
+#     )
+#     first_name = serializers.CharField(required=True)
+#     last_name = serializers.CharField(required=True)
+
+#     class Meta:
+#         model = Profile
+#         fields = ('first_name', 'last_name', 'email')
+
+#     def update(self, instance, validated_data):
+
+#         instance.first_name = validated_data['first_name']
+#         instance.last_name = validated_data['last_name']
+#         instance.email = validated_data['email']
+#         instance.save()
+
+#         return instance
+
+
+class UpdateUserSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=True)
+    first_name = serializers.CharField(required=True)
+    last_name = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email')
+        extra_kwargs = {
+            'first_name': {'required': True},
+            'last_name': {'required': True},
+        }
+
+    def validate_email(self, value):
+        user = self.instance
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError(
+                # {"email": "This email is already in use."} # returns object
+                "This email is already in use."  # returns array
+            )
+
+        return value
+
+    def validate_username(self, value):
+        user = self.instance
+        if User.objects.exclude(pk=user.pk).filter(username=value).exists():
+            raise serializers.ValidationError(
+                # {"username": "This username is already in use."}
+                "This username is already in use."
+            )
+        return value
+
+    def update(self, instance, validated_data):
+        instance.first_name = validated_data['first_name']
+        instance.last_name = validated_data['last_name']
+        instance.email = validated_data['email']
+        instance.username = validated_data['username']
+        instance.save()
+
+        return instance
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
@@ -69,6 +135,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 
 class UserDiseaseHistorySerializer(serializers.ModelSerializer):
+    prescription = serializers.ReadOnlyField(
+        source='prescription.description', read_only=True)  # for fetching description row of prescription which is many field
+
     class Meta:
         model = DiseaseHistory
         fields = "__all__"

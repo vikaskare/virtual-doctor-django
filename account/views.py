@@ -5,7 +5,8 @@ from .serializers import (
     RegisterSerializer,
     UserProfileSerializer,
     CustomTokenObtainPairSerializer,
-    UserDiseaseHistorySerializer)
+    UserDiseaseHistorySerializer,
+    UpdateUserSerializer)
 from .models import (
     Profile,
     DiseaseHistory)
@@ -45,14 +46,41 @@ def UserProfileDetail(request):
 @api_view(['PUT'])
 def UserProfileUpdate(request):
     if request.user.id:
+        # try:
         request.data['user'] = request.user.id
         profile = Profile.objects.get(user=request.user.id)
+        profileData = {}
+        profileData['user'] = request.data['user']
+        profileData['mobile'] = request.data['mobile']
+        profileData['age'] = request.data['age']
+        profileData['bp_problem'] = request.data['bpProblem']
+        profileData['blood_group'] = request.data['bloodGroup']
+        profileData['major_health_problem'] = request.data['majorHealthIssue']
+        profileData['city'] = request.data['city']
+        profileData['any_operation'] = request.data['anyOperation']
         serializer = UserProfileSerializer(
-            instance=profile, data=request.data)
+            instance=profile, data=profileData)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
 
+        userData = {}
+        userData['id'] = request.user.id
+        userData['username'] = request.user.username
+        userData['first_name'] = request.data['firstName']
+        userData['last_name'] = request.data['lastName']
+        userData['email'] = request.data['email']
+
+        userSerilizer = UpdateUserSerializer(
+            instance=request.user, data=userData)
+        if userSerilizer.is_valid(raise_exception=True):
+            userSerilizer.save()
+            return Response(userSerilizer.data)
         return Response(serializer.data)
+        # except:
+        #     data = {
+        #         "data": "Insuffient/incorrect data"
+        #     }
+        #     return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
     else:
         data = {
             "data": "Unathorized access"

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.db.models.deletion import CASCADE
 from django.dispatch import receiver
 from django.db.models.signals import post_save
+from prescription.models import Prescription
 
 
 class Profile(models.Model):
@@ -16,6 +17,8 @@ class Profile(models.Model):
         max_length=10, null=True, blank=True)
     city = models.CharField(max_length=225, null=True, blank=True)
     any_operation = models.CharField(max_length=10, null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.user.username
@@ -24,8 +27,11 @@ class Profile(models.Model):
 class DiseaseHistory(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="user_disease")
-    description = models.TextField(blank=False, null=False)
-    remark = models.CharField(max_length=255, blank=True, null=True)
+    disease = models.CharField(max_length=255)
+    prescription = models.ForeignKey(
+        Prescription, on_delete=models.CASCADE, related_name="disease_prescription")
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.user.username
