@@ -62,30 +62,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
-# class UserSerializer(serializers.ModelSerializer):
-#     email = serializers.EmailField(
-#         required=True,
-#         validators=[UniqueValidator(
-#             queryset=User.objects.all(), message="A user with that email already exists."
-#         )]
-#     )
-#     first_name = serializers.CharField(required=True)
-#     last_name = serializers.CharField(required=True)
-
-#     class Meta:
-#         model = Profile
-#         fields = ('first_name', 'last_name', 'email')
-
-#     def update(self, instance, validated_data):
-
-#         instance.first_name = validated_data['first_name']
-#         instance.last_name = validated_data['last_name']
-#         instance.email = validated_data['email']
-#         instance.save()
-
-#         return instance
-
-
 class UpdateUserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     first_name = serializers.CharField(required=True)
